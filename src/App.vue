@@ -1,25 +1,72 @@
 <script setup lang="ts">
 import Loading from './components/Loading.vue'
 
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 
 const videoSrc = ref('videos/video.mp4');
 const loading = ref(false);
 const videoVisible = ref(true);
-const exampleSrc = ref('')
+const pageNum = ref(0);
+const selectedImgIndex = ref(0);
+const selectedSize = ref('S');
+const white = ref(true)
 let scanCode = '';
+const config = [
+  { 
+    id: '8173641A9C4504',
+    type: 'white'
+  },
+  {
+    id: '8173641A9C4104',
+    type: 'black'
+  }
+]
 
 const keyUpHandler = (e: KeyboardEvent):void => {
   if (e.key !== "Shift" && e.key !== "Enter" && e.key !== "Alt") {
     scanCode += e.key;
   } else if(e.key === "Enter") {
-    console.log(scanCode)
+    const keyItem = config.find(item => item.id === scanCode)
     scanCode = '';
-    exampleSrc.value = '/example/white.png'
+    white.value = keyItem?.type === 'white' ? true : false;
     loading.value = true;
     videoVisible.value = false;
   }
 
+}
+
+const exampleSrc = computed(() => {
+  return white.value ? '/example/white.png' : '/example/black.png'
+});
+
+watch(selectedImgIndex, (val) => {
+  if (val === 0 || val === 2) {
+    white.value = true
+  } else {
+    white.value = false
+  }
+})
+
+
+const chooseImg = (e: MouseEvent) => {
+  const img = e.target;
+  if (img) {
+    const index = parseInt((img as HTMLElement).getAttribute('id') as string)
+    if (index >= 0) selectedImgIndex.value = index
+  }
+}
+
+const chooseSize = (s: string) => {
+  selectedSize.value = s
+}
+
+const chooseImgIndex = (i: number) => {
+  selectedImgIndex.value = i
+}
+
+const toImgPage = (i: number) => {
+  selectedImgIndex.value = i
+  pageNum.value = 1
 }
 
 onMounted(() => {
@@ -36,14 +83,14 @@ onUnmounted(() => {
   <video v-if="videoVisible" :src="videoSrc" autoplay loop></video>
   <div v-else class="m-main">
     <Loading v-show="loading" :loading="loading" :wait="2000" @change="loading = false" />
-    <div v-show="!loading" class="m-example" style="color: #fff">
+    <div v-show="!loading && pageNum === 0" class="m-example" style="color: #fff">
       <img class="m-bg" src="./assets/bg.png" alt="">
       <div class="m-pic-box">
         <div class="m-pic">
           <img :src="exampleSrc" alt="">
         </div>
         <p style="margin-top: 28px">PX（Pixel）Block</p>
-        <p>DIAMOND LOVE #BLACK</p>
+        <p>DIAMOND LOVE <em>#BLACK</em></p>
       </div>
       <div class="m-num-info">
         <h3>PX Block DIAMOND LOVE 钻石爱心像素系列图腾</h3>
@@ -61,20 +108,20 @@ onUnmounted(() => {
         <div class="m-content">
           <div class="m-size">
             <img style="display: block" src="./assets/chi_ma.png" alt="">
-            <div class="m-btn">S</div>
-            <div class="m-btn">M</div>
-            <div class="m-btn active">L</div>
+            <div id="S" class="m-btn" :class="selectedSize === 'S' ? 'active' : ''" @click="chooseSize('S')">S</div>
+            <div id="M" class="m-btn" :class="selectedSize === 'M' ? 'active' : ''" @click="chooseSize('M')">M</div>
+            <div id="L" class="m-btn" :class="selectedSize === 'L' ? 'active' : ''" @click="chooseSize('L')">L</div>
           </div>
           <div class="m-tu-an">
             <img style="display: block" src="./assets/tu_an.png" alt="" >
             <div>
-              <div class="m-img active">
+              <div class="m-img" :class="selectedImgIndex === 0 ? 'active' : ''" @click="chooseImgIndex(0)">
                 <img src="/example/heart1.png" alt="">
               </div>
-              <div class="m-img">
+              <div class="m-img" :class="selectedImgIndex === 1 ? 'active' : ''" @click="chooseImgIndex(1)">
                 <img src="/example/heart2.png" alt="">
               </div>
-              <div class="m-img m-other">
+              <div class="m-img m-other" :class="selectedImgIndex > 1 ? 'active' : ''" @click="toImgPage(2)">
                 <span>其他系列</span>
               </div>
             </div>
@@ -87,13 +134,89 @@ onUnmounted(() => {
           <div class="m-left">
             <h3>NFT发行量-399</h3>
           </div>
-          <div class="m-right"><span>立即下单</span></div>
+          <div class="m-right" @click="pageNum = 2"><span>立即下单</span></div>
         </div>
         <div style="text-algin: right; margin-top: 48px">
           <img src="./assets/bg3.png" alt="">
         </div>
       </div>
 
+    </div>
+    <div v-show="!loading && pageNum === 1" class="m-example m-page-1">
+      <img class="m-bg" src="./assets/bg.png" alt="">
+      <ul class="m-content" @click="chooseImg">
+        <li>
+          <div :class="selectedImgIndex === 2 ? 'active': ''"><img id="2" src="/example/white_l.png" alt=""></div>
+          <div :class="selectedImgIndex === 3 ? 'active': ''"><img id="3" src="/example/black_l.png" alt=""></div>
+          <div class="disabled" :class="selectedImgIndex === 4 ? 'active': ''"><img id="4" src="/example/disabled_1.png" alt=""></div>
+          <div class="disabled" :class="selectedImgIndex === 5 ? 'active': ''"><img id="5" src="/example/disabled_2.png" alt=""></div>
+          <div class="disabled" :class="selectedImgIndex === 6 ? 'active': ''"><img id="6" src="/example/disabled_3.png" alt=""></div>
+        </li>
+        <li>
+          <div class="disabled" :class="selectedImgIndex === 7 ? 'active': ''"><img id="7" src="/example/disabled_4.png" alt=""></div>
+          <div class="disabled" :class="selectedImgIndex === 8 ? 'active': ''"><img id="8" src="/example/disabled_5.png" alt=""></div>
+          <div class="disabled" :class="selectedImgIndex === 9 ? 'active': ''"><img id="9" src="/example/disabled_6.png" alt=""></div>
+          <div class="disabled" :class="selectedImgIndex === 10 ? 'active': ''"><img id="10" src="/example/disabled_7.png" alt=""></div>
+          <!-- <div :class="selectedImgIndex === 11 ? 'active': ''"><img id="11" src="/example/disabled_1.png" alt=""></div> -->
+        </li>
+      </ul>
+
+      <div class="m-footer">
+        <div class="m-line">
+          <div class="m-left">
+          </div>
+          <div class="m-right" @click="pageNum = 0"><span>选择图案</span></div>
+        </div>
+        <div style="text-algin: right; margin-top: 48px">
+          <img src="./assets/bg3.png" alt="">
+        </div>
+      </div>
+    </div>
+
+    <div v-show="!loading && pageNum === 2" class="m-example m-page-2">
+      <img class="m-bg" src="./assets/bg.png" alt="">
+      <div class="m-content">
+        <div class="m-box-1">
+          <div class="m-img">
+            <img :src="white ? '/example/white_l.png' : '/example/black_l.png'" alt="">
+            <h3><em>DIAMOND LOVE</em> #{{ white ? 'WHITE' : 'BLACK' }}</h3>
+            <p><span>尺码-{{ selectedSize }}</span></p>
+          </div>
+        </div>
+        <div class="m-box-2"></div>
+      </div>
+
+      <div class="m-footer">
+        <div class="m-line">
+          <div class="m-left">
+          </div>
+          <div class="m-right" @click="pageNum = 3"><span>提交订单</span></div>
+        </div>
+        <div style="text-algin: right; margin-top: 48px">
+          <img src="./assets/bg3.png" alt="">
+        </div>
+      </div>
+
+      <div class="m-to-last" @click="pageNum = 0"><span>返回上页</span></div>
+    </div>
+
+    <div v-show="!loading && pageNum === 3" class="m-example m-page-3">
+      <img class="m-bg" src="./assets/bg.png" alt="">
+      <div class="m-content">
+        <img src="./assets/ok.png" alt="">
+        <p>订单提交成功</p>
+      </div>
+
+      <div class="m-footer">
+        <div class="m-line">
+          <div class="m-left">
+          </div>
+          <div class="m-right" @click="pageNum = 0"><span>返回首页</span></div>
+        </div>
+        <div style="text-algin: right; margin-top: 48px">
+          <img src="./assets/bg3.png" alt="">
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -104,10 +227,16 @@ body,
 #app,
 h3,
 p,
-div {
+div,
+ul,
+li {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+li {
+  list-style: none;
 }
 
 ::-webkit-scrollbar {
@@ -123,6 +252,11 @@ div {
   width: 1920px;
   height: auto;
   vertical-align: middle;
+}
+em {
+  font-family: AlibabaPuHuiTi-Light;
+  font-style: normal;
+  font-weight: 200;
 }
 .m-main {
   width: 100%;
@@ -285,6 +419,7 @@ div {
   position: absolute;
   left: 861px;
   top: 902px;
+  z-index: 1000;
 }
 .m-footer .m-line {
   display: flex;
@@ -319,6 +454,140 @@ div {
   cursor: pointer;
 }
 .m-footer .m-line .m-right span {
+  font-size: 30px;
+  font-family: AlibabaPuHuiTi-Bold, AlibabaPuHuiTi;
+  font-weight: bold;
+  color: #000000;
+  user-select: none;
+  -webkit-background-clip: text;
+}
+
+.m-page-1 .m-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: 167px 92px;
+  z-index: 100;
+}
+
+.m-page-1 .m-content li {
+  display: flex;
+  width: 100%;
+  height: 300px;
+  margin-bottom: 50px;
+  align-items: center;
+}
+.m-page-1 .m-content li > div {   
+  width: 300px;
+  height: 300px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #474747, #181818);
+}
+.m-page-1 .m-content li > div + div {
+  margin-left: 65px;
+}
+.m-page-1 .m-content li > div img {
+  width: 100%;
+  user-select: none;
+}
+.m-page-1 .m-content li .active {
+  border: 1px solid #fff;
+}
+.m-page-1 .m-content li .disabled {
+  pointer-events: none;
+}
+
+.m-page-2 .m-content{
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 215px 416px;
+  width: 100vw;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+}
+.m-page-2 .m-content .m-box-1 {
+  width: 406px;
+  height: 552px;
+  background: url("./assets/border3.png");
+}
+
+.m-page-2 .m-content .m-box-2 {
+  width: 588px;
+  height: 552px;
+  background: url("./assets/border4.png");
+}
+.m-page-2 .m-content .m-box-1 .m-img {
+  margin: 90px auto 27px;
+  width: 300px;
+  height: 300px;
+}
+.m-page-2 .m-content .m-box-1 .m-img h3 {
+  margin-bottom: 15px;
+  height: 25px;
+  font-size: 18px;
+  font-family: AlibabaPuHuiTi-Light, AlibabaPuHuiTi;
+  font-weight: 300;
+  color: #FFFFFF;
+  line-height: 25px;
+  text-align: center;
+  -webkit-background-clip: text;
+}
+.m-page-2 .m-content .m-box-1 .m-img p {
+  margin: 0 auto;
+  width: 217px;
+  height: 38px;
+  line-height: 38px;
+  background-color: #fff;
+  text-align: center;
+}
+.m-page-2 .m-content .m-box-1 .m-img p span {
+  font-size: 18px;
+  font-family: Source Han Sans CN-Bold, Source Han Sans CN;
+  font-weight: bold;
+  color: #000000;
+  letter-spacing: 3px;
+  -webkit-background-clip: text;
+}
+.m-page-3 .m-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 215px;
+  width: 100vw;
+  text-align: center;
+}
+.m-page-3 .m-content p {
+  padding-left: 68px;
+  margin-top: 20px;
+  height: 33px;
+  font-size: 24px;
+  font-family: AlibabaPuHuiTi-Medium, AlibabaPuHuiTi;
+  font-weight: 500;
+  color: #FFFFFF;
+  line-height: 33px;
+  letter-spacing: 2px;
+  text-align: center;
+  -webkit-background-clip: text;
+}
+.m-to-last {
+  position: absolute;
+  left: 110px;
+  top: 902px;
+  width: 160px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 1000;
+}
+.m-to-last span {
   font-size: 30px;
   font-family: AlibabaPuHuiTi-Bold, AlibabaPuHuiTi;
   font-weight: bold;

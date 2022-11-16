@@ -26,6 +26,14 @@
 </template>
 
 <style>
+@keyframes Rotate {
+  0% {
+    transform: translateX(-50%) rotate(0);
+  }
+  100% {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
 .m-box {
   padding: relative;
   height: 100%;
@@ -49,14 +57,6 @@
   width: 108px;
   height: 108px;
   z-index: 100;
-}
-.m-ring {
-  width: 108px;
-  height: 108px;
-  border: 16px solid #fff;
-  border-radius: 50%;
-  clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
-  box-sizing: border-box;
-  transform: rotate(0deg);
+  animation: Rotate 1s linear infinite;
 }
 </style>

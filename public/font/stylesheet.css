@@ -1,7 +1,25 @@
 @font-face {
-    font-family: 'AlibabaPuHuiTi';
-    src: url('AlibabaPuHuiTi-Regular.woff2') format('woff2'),
-        url('AlibabaPuHuiTi-Regular.woff') format('woff');
+    font-family: 'AlibabaPuHuiTi-Light';
+    src: url('AlibabaPuHuiTi_2_45_Light.woff2') format('woff2'),
+        url('AlibabaPuHuiTi_2_45_Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'AlibabaPuHuiTi-Medium';
+    src: url('AlibabaPuHuiTi_2_65_Medium.woff2') format('woff2'),
+        url('AlibabaPuHuiTi_2_65_Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'AlibabaPuHuiTi-Regular';
+    src: url('AlibabaPuHuiTi_2_55_Regular.woff2') format('woff2'),
+        url('AlibabaPuHuiTi_2_55_Regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -9,8 +27,8 @@
 
 @font-face {
     font-family: 'AlibabaPuHuiTi-Bold';
-    src: url('AlibabaPuHuiTi-Bold.woff2') format('woff2'),
-        url('AlibabaPuHuiTi-Bold.woff') format('woff');
+    src: url('AlibabaPuHuiTi_2_85_Bold.woff2') format('woff2'),
+        url('AlibabaPuHuiTi_2_85_Bold.woff') format('woff');
     font-weight: bold;
     font-style: normal;
     font-display: swap;
