@@ -14,11 +14,13 @@ let scanCode = '';
 const config = [
   { 
     id: '8173641A9C4504',
-    type: 'white'
+    type: 'white',
+    size: 'S'
   },
   {
     id: '8173641A9C4104',
-    type: 'black'
+    type: 'black',
+    size: 'M'
   }
 ]
 
@@ -28,7 +30,15 @@ const keyUpHandler = (e: KeyboardEvent):void => {
   } else if(e.key === "Enter") {
     const keyItem = config.find(item => item.id === scanCode)
     scanCode = '';
+    if (!keyItem) return
     white.value = keyItem?.type === 'white' ? true : false;
+    if (white.value) {
+      selectedImgIndex.value = 0
+    } else {
+      selectedImgIndex.value = 1
+    }
+    selectedSize.value = keyItem.size;
+    pageNum.value = 0
     loading.value = true;
     videoVisible.value = false;
   }
@@ -36,7 +46,7 @@ const keyUpHandler = (e: KeyboardEvent):void => {
 }
 
 const exampleSrc = computed(() => {
-  return white.value ? '/example/white.png' : '/example/black.png'
+  return white.value ? 'example/white.png' : 'example/black.png'
 });
 
 watch(selectedImgIndex, (val) => {
@@ -69,6 +79,14 @@ const toImgPage = (i: number) => {
   pageNum.value = 1
 }
 
+const toVideo = () => {
+  videoVisible.value = true
+}
+
+const clearScanCode = () => {
+  scanCode = ''
+}
+
 onMounted(() => {
   document.addEventListener('keydown', keyUpHandler)
 });
@@ -82,15 +100,16 @@ onUnmounted(() => {
 <template>
   <video v-if="videoVisible" :src="videoSrc" autoplay loop></video>
   <div v-else class="m-main">
+    <div class="m-video-btn" @click="toVideo"></div>
     <Loading v-show="loading" :loading="loading" :wait="2000" @change="loading = false" />
-    <div v-show="!loading && pageNum === 0" class="m-example" style="color: #fff">
+    <div v-show="!loading && pageNum === 0" class="m-example">
       <img class="m-bg" src="./assets/bg.png" alt="">
       <div class="m-pic-box">
         <div class="m-pic">
           <img :src="exampleSrc" alt="">
         </div>
         <p style="margin-top: 28px">PX（Pixel）Block</p>
-        <p>DIAMOND LOVE <em>#BLACK</em></p>
+        <p>DIAMOND LOVE <em>#{{ white ? 'WHITE' : 'BLACK' }}</em></p>
       </div>
       <div class="m-num-info">
         <h3>PX Block DIAMOND LOVE 钻石爱心像素系列图腾</h3>
@@ -178,7 +197,7 @@ onUnmounted(() => {
       <div class="m-content">
         <div class="m-box-1">
           <div class="m-img">
-            <img :src="white ? '/example/white_l.png' : '/example/black_l.png'" alt="">
+            <img :src="white ? 'example/white_l.png' : 'example/black_l.png'" alt="">
             <h3><em>DIAMOND LOVE</em> #{{ white ? 'WHITE' : 'BLACK' }}</h3>
             <p><span>尺码-{{ selectedSize }}</span></p>
           </div>
@@ -246,6 +265,7 @@ li {
 #app {
   width: 1920px;
   height: 100vh;
+  overflow: hidden;
   background-color: #000;
 }
 #app video {
@@ -594,5 +614,15 @@ em {
   color: #000000;
   user-select: none;
   -webkit-background-clip: text;
+}
+.m-video-btn {
+  position: absolute;
+  left: 50px;
+  top: 40px;
+  width: 360px;
+  height: 70px;
+  background-color: #fff;
+  z-index: 999999;
+  opacity: 0;
 }
 </style>

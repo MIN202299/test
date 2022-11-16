@@ -50,6 +50,7 @@ async function createWindow() {
       nodeIntegration: true,
       contextIsolation: false,
     },
+    show: false
   })
     // 全屏
     win.fullScreenable= true
@@ -74,7 +75,15 @@ async function createWindow() {
     if (url.startsWith('https:')) shell.openExternal(url)
     return { action: 'deny' }
   })
-  
+
+  // 不会有白色闪屏
+  win.once('ready-to-show', () => {
+    win.show()
+  })
+  // 窗口处于焦点
+  // win.on('focus', () => {
+  //   console.log('focus')
+  // })
 }
 
 app.whenReady().then(createWindow)
