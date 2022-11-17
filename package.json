@@ -35,5 +35,8 @@
     "vite",
     "vue3",
     "vue"
-  ]
+  ],
+  "dependencies": {
+    "electron-log": "^4.4.8"
+  }
 }

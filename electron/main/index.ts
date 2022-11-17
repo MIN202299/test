@@ -110,6 +110,8 @@ app.on('activate', () => {
   }
 })
 
+console.log(`logger: ${app.getPath('userData')}`)
+
 // new window example arg: new windows url
 ipcMain.handle('open-win', (event, arg) => {
   const childWindow = new BrowserWindow({

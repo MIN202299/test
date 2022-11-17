@@ -2,6 +2,7 @@
 import Loading from './components/Loading.vue'
 
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+const log = require('electron-log');
 
 const videoSrc = ref('videos/video.mp4');
 const loading = ref(false);
@@ -11,6 +12,13 @@ const selectedImgIndex = ref(0);
 const selectedSize = ref('S');
 const white = ref(true)
 let scanCode = '';
+
+const username = ref('小明');
+const phoneNum = ref ('15000000000');
+
+const errorMsgVisible = ref(false);
+const canScan = ref(true)
+
 const config = [
   { 
     id: '8173641A9C4504',
@@ -25,6 +33,7 @@ const config = [
 ]
 
 const keyUpHandler = (e: KeyboardEvent):void => {
+  if (!canScan.value) return
   if (e.key !== "Shift" && e.key !== "Enter" && e.key !== "Alt") {
     scanCode += e.key;
   } else if(e.key === "Enter") {
@@ -87,6 +96,24 @@ const clearScanCode = () => {
   scanCode = ''
 }
 
+const submitTrade = () => {
+ if (!checkPhone()) return
+  pageNum.value = 3
+  log.info(JSON.stringify({ name: username.value, phone: phoneNum.value }));
+}
+
+const checkPhone = (): boolean => {
+  canScan.value = true
+  const regx = /^1[3456789]\d{9}$/
+  if (!regx.test(phoneNum.value)) {
+    errorMsgVisible.value = true
+    // console.log('手机号不合法')
+    return false
+  }
+  errorMsgVisible.value = false
+  return true
+}
+
 onMounted(() => {
   document.addEventListener('keydown', keyUpHandler)
 });
@@ -99,7 +126,7 @@ onUnmounted(() => {
 
 <template>
   <video v-if="videoVisible" :src="videoSrc" autoplay loop></video>
-  <div v-else class="m-main">
+  <div v-else class="m-main" @click="clearScanCode">
     <div class="m-video-btn" @click="toVideo"></div>
     <Loading v-show="loading" :loading="loading" :wait="2000" @change="loading = false" />
     <div v-show="!loading && pageNum === 0" class="m-example">
@@ -121,6 +148,11 @@ onUnmounted(() => {
         <div class="m-tips">
           PXBlock是以像素Pixel为核心表现的数字艺术内容创作单位,专注于数字艺术与公共、时尚艺术领域的创作，探索全新的数字艺术表现方式。
         </div>
+      </div>
+
+      <div class="m-brand">
+        <img src="./assets/logo.png" alt="">
+        <p>UNTILWERICH品牌成立于2021年，隶属于杭州满座电子商务有限公司旗下。品牌设计主要以美式街头风格为主，从说唱、滑板、经典、艺术等多个领域吸取创作灵感，通过服装、配饰、饰品等多个类目上的设计传达品牌思想以及态度。</p>
       </div>
 
       <div class="m-info">
@@ -151,9 +183,15 @@ onUnmounted(() => {
       <div class="m-footer">
         <div class="m-line">
           <div class="m-left">
-            <h3>NFT发行量-399</h3>
+            <h3></h3>
           </div>
-          <div class="m-right" @click="pageNum = 2"><span>立即下单</span></div>
+          <div class="m-price">
+            <span>合计</span>
+            <strong>299元</strong>
+          </div>
+          <div class="m-right" @click="pageNum = 2">
+            <span>立即下单</span>
+          </div>
         </div>
         <div style="text-algin: right; margin-top: 48px">
           <img src="./assets/bg3.png" alt="">
@@ -202,14 +240,22 @@ onUnmounted(() => {
             <p><span>尺码-{{ selectedSize }}</span></p>
           </div>
         </div>
-        <div class="m-box-2"></div>
+        <div class="m-box-2">
+          <div class="m-form">
+            <label for="name">姓名</label>
+            <input id="name" v-model="username" type="text" @focus="canScan=false" @blur="canScan=true" spellcheck="false" />
+            <label for="phone" >手机号</label>
+            <input class="m-phone" type="text" v-model="phoneNum" @focus="canScan=false" @blur="checkPhone" spellcheck="false" />
+            <span class="m-error-msg" :class="errorMsgVisible ? 'm-show': ''">号码不合法，请重新输入</span>
+          </div>
+        </div>
       </div>
 
       <div class="m-footer">
         <div class="m-line">
           <div class="m-left">
           </div>
-          <div class="m-right" @click="pageNum = 3"><span>提交订单</span></div>
+          <div class="m-right" @click="submitTrade"><span>提交订单</span></div>
         </div>
         <div style="text-algin: right; margin-top: 48px">
           <img src="./assets/bg3.png" alt="">
@@ -367,11 +413,39 @@ em {
   -webkit-background-clip: text;
 }
 
+.m-example .m-brand {
+  display: flex;
+  position: absolute;
+  top: 433px;
+  left: 861px;
+  height: 50px;
+  width: 962px;
+  align-items: center;
+}
+
+.m-example .m-brand img {
+  width: 68px;
+  height: 30px;
+  object-fit: cover;
+  margin-right: 30px;
+}
+
+.m-example .m-brand p {
+  width: 861px;
+  height: 50px;
+  font-size: 15px;
+  font-family: AlibabaPuHuiTi-Regular, AlibabaPuHuiTi;
+  font-weight: 400;
+  color: rgba(255,255,255,0.6);
+  line-height: 25px;
+  -webkit-background-clip: text;
+}
+
 .m-example .m-info {
   position: absolute;
   padding: 69px 20px 20px 20px;
   left: 861px;
-  top: 479px;
+  top: 509px;
   width: 962px;
   height: 330px;
   background: url("./assets/border2.png");
@@ -442,6 +516,7 @@ em {
   z-index: 1000;
 }
 .m-footer .m-line {
+  position: relative;
   display: flex;
   width: 962px;
   justify-content: space-between;
@@ -457,7 +532,7 @@ em {
   -webkit-background-clip: text;
 }
 .m-footer .m-left h3::after {
-  margin-top: 10px;
+  margin-top: 50px;
   display: block;
   content: "";
   width: 210px;
@@ -479,6 +554,45 @@ em {
   font-weight: bold;
   color: #000000;
   user-select: none;
+  -webkit-background-clip: text;
+}
+
+.m-footer .m-price{
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 536px;
+  height: 60px;
+  align-items: center;
+}
+
+.m-footer .m-price span {
+  margin-right: 20px;
+  height: 30px;
+  font-size: 22px;
+  font-family: AlibabaPuHuiTi-Regular, AlibabaPuHuiTi;
+  font-weight: 400;
+  color: #FFFFFF;
+  line-height: 30px;
+  -webkit-background-clip: text;
+}
+
+.m-footer .m-price::before {
+  display: block;
+  content: "";
+  width: 16px;
+  height: 16px;
+  margin-right: 15px;
+  background-color: #fff;
+}
+
+.m-footer .m-price strong {
+  height: 30px;
+  font-size: 30px;
+  font-family: AlibabaPuHuiTi-Bold, AlibabaPuHuiTi;
+  font-weight: bold;
+  color: #FFFFFF;
+  line-height: 30px;
   -webkit-background-clip: text;
 }
 
@@ -537,10 +651,74 @@ em {
 }
 
 .m-page-2 .m-content .m-box-2 {
+  position: relative;
+  padding: 130px;
   width: 588px;
   height: 552px;
   background: url("./assets/border4.png");
 }
+.m-page-2 .m-content .m-box-2::before {
+  display: block;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 119px;
+  height: 46px;
+  background: url('./assets/deng_ji.png');
+}
+.m-page-2 .m-content .m-box-2 .m-form {
+  text-align: center;
+
+}
+.m-page-2 .m-content .m-box-2 .m-form label {
+  display: block;
+  margin-bottom: 14px;
+  height: 33px;
+  font-size: 24px;
+  font-family: AlibabaPuHuiTi-Medium, AlibabaPuHuiTi;
+  font-weight: 500;
+  color: #FFFFFF;
+  line-height: 33px;
+  letter-spacing: 2px;
+  -webkit-background-clip: text;
+}
+.m-page-2 .m-content .m-box-2 .m-form input {
+  display: block;
+  margin-bottom: 95px;
+  width: 100%;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+  border: 1px solid #FFFFFF;
+  background: rgba(255,255,255,0.1);
+  outline: none;
+  color: #FFFFFF;
+  letter-spacing: 2px;
+  font-size: 20px;
+  font-weight: 400;
+  font-family: AlibabaPuHuiTi-Regular, AlibabaPuHuiTi;
+}
+.m-page-2 .m-content .m-box-2 .m-form .m-phone {
+  margin-bottom: 0;
+}
+.m-page-2 .m-content .m-box-2 .m-form .m-error-msg {
+  width: 328px;
+  height: 14px;
+  font-size: 14px;
+  font-family: AlibabaPuHuiTi-Light, HarmonyOS Sans SC;
+  font-weight: 300;
+  color: #FA5151;
+  line-height: 16px;
+  opacity: 0;
+  -webkit-background-clip: text;
+  transition: all 0.2s;
+}
+
+.m-page-2 .m-content .m-box-2 .m-form .m-show {
+  opacity: 1;
+}
+
 .m-page-2 .m-content .m-box-1 .m-img {
   margin: 90px auto 27px;
   width: 300px;
